@@ -1,4 +1,4 @@
-const ESP32_IP = "111.111.111.111"; // <<--- Cambia esto por la IP de tu ESP32
+const ESP32_IP = "10.205.92.157"; // <<--- Cambia esto por la IP de tu ESP32
 
 export const fetchInitialStatus = async () => {
   try {
