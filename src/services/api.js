@@ -41,3 +41,19 @@ export const connectMQTT = (onMessageCallback, onErrorCallback) => {
     return null;
   }
 };
+
+const MQTT_CMD_TOPIC = "agro_mind_riego_6af1446e/cmd";
+
+export const enviarComandoMQTT = (client, comando) => {
+  if (client && client.connected) {
+    client.publish(MQTT_CMD_TOPIC, comando, (err) => {
+      if (err) {
+        console.error("Error al enviar comando MQTT:", err);
+      } else {
+        console.log(`Comando '${comando}' enviado exitosamente`);
+      }
+    });
+  } else {
+    console.warn("No se pudo enviar comando, cliente MQTT no conectado");
+  }
+};

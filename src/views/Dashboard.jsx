@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import InfoCard from '../components/InfoCard';
 import HumedadChart from '../components/HumedadChart';
+import ControlManual from '../components/ControlManual';
 import { connectMQTT } from '../services/api';
 
 const Dashboard = () => {
   const [bombaActiva, setBombaActiva] = useState(null);
   const [umbral, setUmbral] = useState(null);
+  const [modoManual, setModoManual] = useState(false);
+  const [mqttClient, setMqttClient] = useState(null);
   const [humedadActual, setHumedadActual] = useState(0);
   const [datosGrafica, setDatosGrafica] = useState({ labels: [], valores: [] });
   const [conexionStatus, setConexionStatus] = useState("Conectando al Broker MQTT...");
@@ -19,6 +22,9 @@ const Dashboard = () => {
         // Al recibir el mensaje
         setUmbral(data.umbral_riego);
         setBombaActiva(data.bomba_activa);
+        if (data.modo_manual !== undefined) {
+          setModoManual(data.modo_manual);
+        }
         setHumedadActual(data.humedad);
         setConexionStatus(null); // Conectado y recibiendo datos
         setErrorStatus(null);
@@ -42,6 +48,8 @@ const Dashboard = () => {
         setConexionStatus(null);
       }
     );
+
+    setMqttClient(client);
 
     return () => {
       if (client) {
@@ -68,6 +76,14 @@ const Dashboard = () => {
       )}
       
       <InfoCard bombaActiva={bombaActiva} umbral={umbral} />
+
+      <ControlManual 
+        client={mqttClient} 
+        modoManual={modoManual} 
+        setModoManual={setModoManual}
+        bombaActiva={bombaActiva} 
+        setBombaActiva={setBombaActiva}
+      />
 
       <div className="valor-actual">
         Humedad en Tiempo Real: <span>{humedadActual}</span>%
