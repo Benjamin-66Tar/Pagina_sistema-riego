@@ -53,7 +53,7 @@ const Dashboard = () => {
 
   return (
     <div className="container">
-      <h1>Panel de Control AgroMind</h1>
+      <h1>Panel de Control del Sistema de Riego</h1>
 
       {conexionStatus && (
         <div style={{ backgroundColor: '#e2f0d9', color: '#385723', padding: '12px', borderRadius: '6px', marginBottom: '20px', fontSize: '0.9rem', textAlign: 'center', border: '1px solid #c5e0b4' }}>
