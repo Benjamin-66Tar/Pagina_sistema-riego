@@ -1,44 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import InfoCard from '../components/InfoCard';
 import HumedadChart from '../components/HumedadChart';
-import { fetchInitialStatus, getWebSocketUrl } from '../services/api';
+import { connectMQTT } from '../services/api';
 
 const Dashboard = () => {
   const [bombaActiva, setBombaActiva] = useState(null);
   const [umbral, setUmbral] = useState(null);
   const [humedadActual, setHumedadActual] = useState(0);
   const [datosGrafica, setDatosGrafica] = useState({ labels: [], valores: [] });
+  const [conexionStatus, setConexionStatus] = useState("Conectando al Broker MQTT...");
   const [errorStatus, setErrorStatus] = useState(null);
 
   const maxDatos = 20;
 
   useEffect(() => {
-    // 1. Cargar datos iniciales (Fetch)
-    fetchInitialStatus()
-      .then((data) => {
+    let client = connectMQTT(
+      (data) => {
+        // Al recibir el mensaje
         setUmbral(data.umbral_riego);
         setBombaActiva(data.bomba_activa);
-      })
-      .catch((err) => {
-        console.error("Error cargando configuración inicial:", err);
-        setErrorStatus("No se pudo conectar con el ESP32 (¿Problema de HTTPS o dirección IP?)");
-      });
-
-    // 2. Conexión WebSocket en tiempo real
-    let connection = null;
-    try {
-      const wsUri = getWebSocketUrl();
-      connection = new WebSocket(wsUri);
-
-      connection.onmessage = (event) => {
-        const porcentaje = parseInt(event.data, 10);
-        setHumedadActual(porcentaje);
+        setHumedadActual(data.humedad);
+        setConexionStatus(null); // Conectado y recibiendo datos
+        setErrorStatus(null);
 
         const tiempoActual = new Date().toLocaleTimeString();
 
         setDatosGrafica((prevDatos) => {
           const nuevosLabels = [...prevDatos.labels, tiempoActual];
-          const nuevosValores = [...prevDatos.valores, porcentaje];
+          const nuevosValores = [...prevDatos.valores, data.humedad];
 
           if (nuevosLabels.length > maxDatos) {
             nuevosLabels.shift();
@@ -47,21 +36,17 @@ const Dashboard = () => {
 
           return { labels: nuevosLabels, valores: nuevosValores };
         });
-      };
+      },
+      (errorMessage) => {
+        setErrorStatus(errorMessage);
+        setConexionStatus(null);
+      }
+    );
 
-      connection.onerror = (error) => {
-        console.error('Error en WebSocket: ', error);
-        setErrorStatus("Error en la conexión WebSocket.");
-      };
-    } catch (e) {
-      console.error("Excepción al conectar WebSocket:", e);
-      setErrorStatus("Bloqueo de seguridad: No se permiten conexiones WebSocket inseguras (ws://) desde un sitio seguro (https://).");
-    }
-
-    // Limpieza de la conexión al desmontar el componente
     return () => {
-      if (connection) {
-        connection.close();
+      if (client) {
+        console.log("Cerrando cliente MQTT...");
+        client.end();
       }
     };
   }, []);
@@ -70,14 +55,15 @@ const Dashboard = () => {
     <div className="container">
       <h1>Panel de Control AgroMind</h1>
 
+      {conexionStatus && (
+        <div style={{ backgroundColor: '#e2f0d9', color: '#385723', padding: '12px', borderRadius: '6px', marginBottom: '20px', fontSize: '0.9rem', textAlign: 'center', border: '1px solid #c5e0b4' }}>
+          <strong>Estado:</strong> {conexionStatus} (Asegúrate de que tu ESP32 esté encendido y conectado a internet)
+        </div>
+      )}
+
       {errorStatus && (
         <div style={{ backgroundColor: '#f8d7da', color: '#721c24', padding: '12px', borderRadius: '6px', marginBottom: '20px', fontSize: '0.9rem', textAlign: 'left', border: '1px solid #f5c6cb' }}>
-          <strong>Aviso de Seguridad / Conexión:</strong> {errorStatus}
-          <br />
-          <span style={{ fontSize: '0.8rem', marginTop: '5px', display: 'block', color: '#491217' }}>
-            Dado que estás accediendo a través de un sitio seguro (<strong>HTTPS</strong> en Vercel), el navegador bloquea las peticiones directas HTTP e insecure WebSockets (<strong>ws://</strong>) hacia tu ESP32 local por seguridad (Mixed Content). 
-            Para probar la comunicación real, te recomendamos ejecutar el proyecto de manera local (usando HTTP en <strong>http://localhost:5173</strong>).
-          </span>
+          <strong>Error de Conexión:</strong> {errorStatus}
         </div>
       )}
       

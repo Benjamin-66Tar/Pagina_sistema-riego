@@ -1,18 +1,43 @@
-const ESP32_IP = "10.205.92.157"; // <<--- Cambia esto por la IP de tu ESP32
+import mqtt from 'mqtt';
 
-export const fetchInitialStatus = async () => {
+const MQTT_BROKER = "wss://broker.hivemq.com:8884/mqtt";
+const MQTT_TOPIC = "agro_mind_riego_6af1446e/status";
+
+export const connectMQTT = (onMessageCallback, onErrorCallback) => {
   try {
-    const response = await fetch(`http://${ESP32_IP}/api/status`);
-    if (!response.ok) {
-      throw new Error('Error en la respuesta de la API');
-    }
-    return await response.json();
-  } catch (error) {
-    console.error('Hubo un problema con la petición Fetch:', error);
-    throw error;
-  }
-};
+    console.log("Intentando conectar al broker MQTT...");
+    const client = mqtt.connect(MQTT_BROKER);
 
-export const getWebSocketUrl = () => {
-  return `ws://${ESP32_IP}:81/`;
+    client.on("connect", () => {
+      console.log("Conectado exitosamente al broker MQTT por WSS");
+      client.subscribe(MQTT_TOPIC, (err) => {
+        if (err) {
+          console.error("Error al suscribirse al tema MQTT:", err);
+          if (onErrorCallback) onErrorCallback("Error al suscribirse al tema MQTT");
+        }
+      });
+    });
+
+    client.on("message", (topic, message) => {
+      if (topic === MQTT_TOPIC) {
+        try {
+          const data = JSON.parse(message.toString());
+          onMessageCallback(data);
+        } catch (e) {
+          console.error("Error al decodificar JSON del broker MQTT:", e);
+        }
+      }
+    });
+
+    client.on("error", (err) => {
+      console.error("Error de cliente MQTT:", err);
+      if (onErrorCallback) onErrorCallback("Error de conexión con el Broker MQTT.");
+    });
+
+    return client;
+  } catch (e) {
+    console.error("Error al iniciar la conexión MQTT:", e);
+    if (onErrorCallback) onErrorCallback("No se pudo iniciar el cliente MQTT.");
+    return null;
+  }
 };
