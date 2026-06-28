@@ -1,51 +1,94 @@
+/* Importar tipografía moderna de Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
+
+/* Fondo con gradiente animado en tonos orgánicos */
 body {
-  font-family: Arial, sans-serif;
-  text-align: center;
-  background-color: #f4f7f6;
+  font-family: 'Outfit', sans-serif;
+  min-height: 100vh;
   margin: 0;
-  padding: 20px;
+  padding: 40px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(-45deg, #e8f5e9, #e0f2f1, #e0f7fa, #f1f8e9);
+  background-size: 400% 400%;
+  animation: gradientAnimation 15s ease infinite;
 }
 
+@keyframes gradientAnimation {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Contenedor principal con efecto de Cristal (Glassmorphism) */
 .container {
-  max-width: 700px;
-  margin: 0 auto;
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 650px;
+  background: rgba(255, 255, 255, 0.45); /* Blanco semi-transparente */
+  backdrop-filter: blur(16px) saturate(120%); /* Efecto vidrio esmerilado */
+  -webkit-backdrop-filter: blur(16px) saturate(120%);
+  border: 1px solid rgba(255, 255, 255, 0.4); /* Reflejo del borde */
+  border-radius: 24px; /* Bordes extra suaves */
+  padding: 35px 30px;
+  box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.08); /* Sombra difusa */
+  text-align: center;
 }
 
 h1 {
-  color: #2c3e50;
+  color: #1e3a2f;
+  font-weight: 700;
+  font-size: 2.2rem;
+  margin-top: 0;
+  margin-bottom: 25px;
+  letter-spacing: -0.5px;
 }
 
+/* Indicador de humedad en tiempo real */
 .valor-actual {
-  font-size: 2rem;
-  color: #27ae60;
-  margin: 10px 0;
-  font-weight: bold;
+  font-size: 4.5rem; /* Humedad grande e impactante */
+  font-weight: 700;
+  color: #059669; /* Verde esmeralda */
+  margin: 20px 0;
+  text-shadow: 0 4px 10px rgba(5, 150, 105, 0.15);
 }
 
+.valor-actual span {
+  font-size: 4.5rem;
+}
+
+/* Tarjeta secundaria de información (Bomba y Umbral) */
 .info-card {
-  background: #eef2f3;
-  padding: 15px;
-  border-radius: 6px;
-  margin-bottom: 20px;
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  padding: 20px;
+  border-radius: 16px;
+  margin-bottom: 30px;
   display: flex;
   justify-content: space-around;
+  align-items: center;
+  font-size: 1.05rem;
+  color: #2d3748;
 }
 
+/* Badges con brillo */
 .badge {
-  padding: 5px 10px;
-  border-radius: 4px;
-  font-weight: bold;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
   color: white;
+  text-transform: uppercase;
 }
 
 .bg-success {
-  background-color: #27ae60;
+  background-color: #10b981;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4); /* Resplandor verde */
 }
 
 .bg-danger {
-  background-color: #e74c3c;
+  background-color: #f43f5e;
+  box-shadow: 0 4px 14px rgba(244, 63, 94, 0.4); /* Resplandor rojo/coral */
 }
